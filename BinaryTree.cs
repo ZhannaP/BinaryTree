@@ -171,11 +171,6 @@ namespace BinaryTree
             return InOrderTraversal().GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         public void PrintTree()
         {
             PrintTree(_root, string.Empty);
