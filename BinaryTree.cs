@@ -7,14 +7,18 @@ using System.Threading.Tasks;
 namespace BinaryTree
 {
     public class BinaryTree<T> : ICollection<T>
-       where T : IComparable<T>
+        where T : IComparable<T>
     {
+        // Компаратор для порівняння значень
         private readonly IComparer<T> _comparer;
-        public Node<T> _root;
+
+        // Корінь 
+        public Node<T> _root; 
 
         public BinaryTree()
         {
-            _comparer = Comparer<T>.Default;
+            // Ініціалізуємо компаратор за замовчуванням
+            _comparer = Comparer<T>.Default; 
         }
 
         public BinaryTree(IComparer<T> comparer)
@@ -22,147 +26,179 @@ namespace BinaryTree
             _comparer = comparer ?? Comparer<T>.Default;
         }
 
-        public int Count { get; private set; }
+        // Кількість елементів у дереві
+        public int Count { get; private set; } 
 
         public bool IsReadOnly => false;
 
-        public void Add(T item)
+        // Додає елемент до дерева
+        public void Add(T item) 
         {
-            _root = Insert(_root, item);
+            _root = Insert(_root, item); 
             Count++;
         }
 
-        private Node<T> Insert(Node<T> node, T item)
+        // Рекурсивний метод для вставки елемента
+        private Node<T> Insert(Node<T> node, T item) 
         {
-            if (node == null)
+            // Якщо вузол порожній
+            if (node == null) 
             {
                 return new Node<T>(item);
             }
 
             int comparisonResult = _comparer.Compare(item, node.Data);
-            if (comparisonResult == 0)
+
+            // Якщо значення вже існує
+            if (comparisonResult == 0) 
             {
-                return node;
+                return node; 
             }
-            else if (comparisonResult < 0)
+            // Якщо значення менше
+            else if (comparisonResult < 0) 
             {
-                node.LeftNode = Insert(node.LeftNode, item);
+                node.LeftNode = Insert(node.LeftNode, item); // Вставляємо вліво
                 node.LeftNode.ParentNode = node;
             }
+            // Якщо значення більше
             else
             {
-                node.RightNode = Insert(node.RightNode, item);
-                node.RightNode.ParentNode = node;
+                node.RightNode = Insert(node.RightNode, item); // Вставляємо вправо
+                node.RightNode.ParentNode = node; 
             }
 
-            return node;
+            return node; // Повертаємо поточний вузол
         }
 
-        public bool Remove(T item)
+        // Видаляє елемент із дерева
+        public bool Remove(T item) 
         {
             Node<T> nodeToRemove = FindNode(item);
             if (nodeToRemove != null)
             {
-                Remove(nodeToRemove);
+                Remove(nodeToRemove); 
                 Count--;
-                return true;
+                return true; 
             }
-            return false;
+            return false; 
         }
 
-        private void Remove(Node<T> nodeToRemove)
+        // Внутрішній метод для видалення вузла
+        private void Remove(Node<T> nodeToRemove) 
         {
-            if (nodeToRemove.LeftNode == null)
+            if (nodeToRemove.LeftNode == null) 
             {
-                Transplant(nodeToRemove, nodeToRemove.RightNode);
+                // Переміщуємо праве піддерево
+                Transplant(nodeToRemove, nodeToRemove.RightNode); 
             }
             else if (nodeToRemove.RightNode == null)
             {
-                Transplant(nodeToRemove, nodeToRemove.LeftNode);
+                // Переміщуємо ліве піддерево
+                Transplant(nodeToRemove, nodeToRemove.LeftNode); 
             }
+
+            // Якщо є обидва піддерева
             else
             {
-                Node<T> successor = FindMin(nodeToRemove.RightNode);
+                // Знаходимо дочірній вузол в правому піддереві
+                Node<T> successor = FindMin(nodeToRemove.RightNode); 
                 if (successor.ParentNode != nodeToRemove)
                 {
+                    // Переміщуємо праве піддерево child
                     Transplant(successor, successor.RightNode);
+                    // Переносимо праве піддерево видаляємого вузла
                     successor.RightNode = nodeToRemove.RightNode;
-                    successor.RightNode.ParentNode = successor;
+                    // Встановлюємо батька для правого піддерева
+                    successor.RightNode.ParentNode = successor; 
                 }
+                // Переміщуємо child на місце видаленого вузла
                 Transplant(nodeToRemove, successor);
+                // Переносимо ліве піддерево видаленого вузла
                 successor.LeftNode = nodeToRemove.LeftNode;
-                successor.LeftNode.ParentNode = successor;
+                // Встановлюємо батька для лівого піддерева
+                successor.LeftNode.ParentNode = successor; 
             }
         }
 
-        public void Transplant(Node<T> u, Node<T> v)
+        // Переміщує піддерево
+        public void Transplant(Node<T> u, Node<T> v) 
         {
-            if (u.ParentNode == null)
+            //вузол корінь
+            if (u.ParentNode == null) 
             {
-                _root = v;
-            }
-            else if (u == u.ParentNode.LeftNode)
-            {
-                u.ParentNode.LeftNode = v;
-            }
-            else
-            {
-                u.ParentNode.RightNode = v;
+                _root = v; 
             }
 
-            if (v != null)
+            // Якщо вузол лівий дочірній вузол
+            else if (u == u.ParentNode.LeftNode) 
+            {
+                u.ParentNode.LeftNode = v; 
+            }
+
+            // Якщо вузол правий дочірній вузол
+            else
+            {
+                u.ParentNode.RightNode = v; 
+            }
+
+            if (v != null) 
             {
                 v.ParentNode = u.ParentNode;
             }
         }
 
-        private static Node<T> FindMin(Node<T> node)
+        // Знаходить вузол з мінімальним значенням
+        private static Node<T> FindMin(Node<T> node) 
         {
-            while (node.LeftNode != null)
+            while (node.LeftNode != null) 
             {
                 node = node.LeftNode;
             }
             return node;
         }
 
-        public bool Contains(T item)
+        // Перевіряє, чи міститься елемент у дереві
+        public bool Contains(T item) 
         {
             return FindNode(item) != null;
         }
 
-        public Node<T> FindNode(T item)
+        // Знаходить вузол за значенням
+        public Node<T> FindNode(T item) 
         {
-            Node<T> currentNode = _root;
-            while (currentNode != null)
+            Node<T> currentNode = _root; 
+            while (currentNode != null) 
             {
-                int comparisonResult = _comparer.Compare(item, currentNode.Data);
-                if (comparisonResult == 0)
+                int comparisonResult = _comparer.Compare(item, currentNode.Data); 
+                if (comparisonResult == 0) 
                 {
-                    return currentNode;
+                    return currentNode; 
                 }
-                else if (comparisonResult < 0)
+                else if (comparisonResult < 0) 
                 {
-                    currentNode = currentNode.LeftNode;
+                    currentNode = currentNode.LeftNode; 
                 }
-                else
+                else 
                 {
-                    currentNode = currentNode.RightNode;
+                    currentNode = currentNode.RightNode; 
                 }
             }
-            return null;
+            return null; 
         }
 
-        public void Clear()
+        // Очищує дерево
+        public void Clear() 
         {
             _root = null;
-            Count = 0;
+            Count = 0; // Скидаємо лічильник
         }
 
+        // Копіює елементи в масив
         public void CopyTo(T[] array, int arrayIndex)
         {
             foreach (var item in InOrderTraversal())
             {
-                array[arrayIndex++] = item;
+                array[arrayIndex++] = item; 
             }
         }
 
@@ -171,90 +207,95 @@ namespace BinaryTree
             return InOrderTraversal().GetEnumerator();
         }
 
-        public void PrintTree()
+        // Виводить структуру дерева на консоль
+        public void PrintTree() 
         {
-            PrintTree(_root, string.Empty);
+            PrintTree(_root, string.Empty); 
         }
 
-        private void PrintTree(Node<T> node, string indent)
+        // Приватний метод для виводу структури дерева
+        private void PrintTree(Node<T> node, string indent) 
         {
-            if (node != null)
+            if (node != null) 
             {
-                Console.WriteLine($"{indent}{node.Data}");
+                Console.WriteLine($"{indent}{node.Data}"); 
                 if (node.LeftNode != null || node.RightNode != null)
                 {
-                    PrintTree(node.LeftNode, indent + "  |");
+                    PrintTree(node.LeftNode, indent + "  |"); 
                     PrintTree(node.RightNode, indent + "   ");
                 }
             }
         }
 
-        public IEnumerable<T> InOrderTraversal()
+        public IEnumerable<T> InOrderTraversal() 
         {
-            return InOrderTraversal(_root);
+            return InOrderTraversal(_root); 
         }
 
-        private IEnumerable<T> InOrderTraversal(Node<T> node)
+        private IEnumerable<T> InOrderTraversal(Node<T> node) 
         {
-            if (node != null)
+            if (node != null) // Якщо вузол не порожній
             {
-                foreach (var leftNodeData in InOrderTraversal(node.LeftNode))
+                foreach (var leftNodeData in InOrderTraversal(node.LeftNode)) // Рекурсивно обходимо ліве піддерево
                 {
-                    yield return leftNodeData;
+                    yield return leftNodeData; 
                 }
-                yield return node.Data;
-                foreach (var rightNodeData in InOrderTraversal(node.RightNode))
+                yield return node.Data; // Повертаємо значення поточного вузла
+                foreach (var rightNodeData in InOrderTraversal(node.RightNode)) // Рекурсивно обходимо праве піддерево
                 {
                     yield return rightNodeData;
                 }
             }
         }
 
-        public IEnumerable<T> PreOrderTraversal()
+        // 
+        public IEnumerable<T> PreOrderTraversal() 
         {
-            return PreOrderTraversal(_root);
+            return PreOrderTraversal(_root); 
         }
 
+        // Приватний метод для префіксного обходу
         private IEnumerable<T> PreOrderTraversal(Node<T> node)
         {
-            if (node != null)
+            if (node != null) // Якщо вузол не порожній
             {
-                yield return node.Data;
-                foreach (var leftNodeData in PreOrderTraversal(node.LeftNode))
+                yield return node.Data; // Повертаємо значення поточного вузла
+                foreach (var leftNodeData in PreOrderTraversal(node.LeftNode)) // Рекурсивно обходимо ліве піддерево
                 {
                     yield return leftNodeData;
                 }
-                foreach (var rightNodeData in PreOrderTraversal(node.RightNode))
+                foreach (var rightNodeData in PreOrderTraversal(node.RightNode)) // Рекурсивно обходимо праве піддерево
                 {
-                    yield return rightNodeData;
+                    yield return rightNodeData; 
                 }
             }
         }
 
-        public IEnumerable<T> PostOrderTraversal()
+        public IEnumerable<T> PostOrderTraversal() 
         {
             return PostOrderTraversal(_root);
         }
 
-        private IEnumerable<T> PostOrderTraversal(Node<T> node)
+        // Приватний метод для постфіксного обходу
+        private IEnumerable<T> PostOrderTraversal(Node<T> node) 
         {
-            if (node != null)
+            if (node != null) 
             {
-                foreach (var leftNodeData in PostOrderTraversal(node.LeftNode))
+                foreach (var leftNodeData in PostOrderTraversal(node.LeftNode)) // Рекурсивно обходимо ліве піддерево
                 {
-                    yield return leftNodeData;
+                    yield return leftNodeData; 
                 }
-                foreach (var rightNodeData in PostOrderTraversal(node.RightNode))
+                foreach (var rightNodeData in PostOrderTraversal(node.RightNode)) // Рекурсивно обходимо праве піддерево
                 {
-                    yield return rightNodeData;
+                    yield return rightNodeData; 
                 }
-                yield return node.Data;
+                yield return node.Data; // Повертаємо значення поточного вузла
             }
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); 
         }
     }
 }
