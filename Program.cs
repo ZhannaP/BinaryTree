@@ -4,7 +4,7 @@ namespace BinaryTree
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             BinaryTree<int> binaryTree = new BinaryTree<int>();
 

@@ -13,7 +13,17 @@ namespace BinaryTree
         private readonly IComparer<T> _comparer;
 
         // Корінь 
-        public Node<T> _root; 
+        public Node<T> _root;
+
+        // Оголошення події для додавання елемента
+        public event Action<T> ItemAdded;
+
+        // Оголошення події для видалення елемента
+        public event Action<T> ItemRemoved;
+
+        // Оголошення події для очищення колекції
+        public event Action CollectionCleared;
+
 
         public BinaryTree()
         {
@@ -36,6 +46,9 @@ namespace BinaryTree
         {
             _root = Insert(_root, item); 
             Count++;
+
+            // Відправка сповіщення про подію додавання елемента
+            ItemAdded?.Invoke(item);
         }
 
         // Рекурсивний метод для вставки елемента
@@ -78,9 +91,12 @@ namespace BinaryTree
             {
                 Remove(nodeToRemove); 
                 Count--;
+
+                // Відправка сповіщення про подію видалення елемента
+                ItemRemoved?.Invoke(item);
                 return true; 
             }
-            return false; 
+            return false;
         }
 
         // Внутрішній метод для видалення вузла
@@ -191,6 +207,9 @@ namespace BinaryTree
         {
             _root = null;
             Count = 0; // Скидаємо лічильник
+
+            // Відправка сповіщення про очищення колекції
+            CollectionCleared?.Invoke();
         }
 
         // Копіює елементи в масив
@@ -232,6 +251,7 @@ namespace BinaryTree
             return InOrderTraversal(_root); 
         }
 
+        //Метод для серединного обходу
         private IEnumerable<T> InOrderTraversal(Node<T> node) 
         {
             if (node != null) // Якщо вузол не порожній
@@ -248,13 +268,13 @@ namespace BinaryTree
             }
         }
 
-        // 
+        
         public IEnumerable<T> PreOrderTraversal() 
         {
             return PreOrderTraversal(_root); 
         }
 
-        // Приватний метод для префіксного обходу
+        // Метод для прямого обходу
         private IEnumerable<T> PreOrderTraversal(Node<T> node)
         {
             if (node != null) // Якщо вузол не порожній
@@ -276,7 +296,7 @@ namespace BinaryTree
             return PostOrderTraversal(_root);
         }
 
-        // Приватний метод для постфіксного обходу
+        // Метод для зворотнього обходу
         private IEnumerable<T> PostOrderTraversal(Node<T> node) 
         {
             if (node != null) 
